@@ -1,0 +1,49 @@
+package com.empresa.tareas.controller;
+
+import com.empresa.tareas.entity.Tarea;
+import com.empresa.tareas.service.TareaService;
+import jakarta.persistence.EntityNotFoundException;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@WebMvcTest(controllers = TareaController.class)
+class TareaControllerTest {
+
+    @Autowired
+    MockMvc mockMvc;
+
+    @MockBean
+    TareaService service;
+
+    @Test
+    void get_tareaExiste_retorna200() throws Exception {
+        Tarea t = new Tarea();
+        t.setId(1L);
+        t.setTitulo("Test");
+
+        when(service.buscarPorId(1L)).thenReturn(t);
+
+        mockMvc.perform(get("/api/tareas/1")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.titulo").value("Test"));
+    }
+
+    @Test
+    void get_noExiste_retorna404() throws Exception {
+        when(service.buscarPorId(99L))
+                .thenThrow(new EntityNotFoundException("no encontrada"));
+
+        mockMvc.perform(get("/api/tareas/99")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+}
