@@ -30,5 +30,11 @@ jobs:
       - name: Instalar Newman
         run: npm install -g newman
 
+      - name: Crear tarea inicial para CI
+        run: |
+          curl -s -X POST http://localhost:8080/api/tareas \
+            -H "Content-Type: application/json" \
+            -d '{"titulo":"Tarea de prueba Newman","descripcion":"Creada por colección Postman"}'
+
       - name: Ejecutar coleccion con Newman
         run: newman run postman/ColeccionToDo.json --environment postman/env-ci.json
