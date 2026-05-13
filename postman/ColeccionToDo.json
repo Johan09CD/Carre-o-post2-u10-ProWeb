@@ -21,7 +21,7 @@
               "pm.test(\"Respuesta contiene id numerico\", () => {\r",
               "    const b = pm.response.json();\r",
               "    pm.expect(b).to.have.property(\"id\");\r",
-              "    pm.collectionVariables.set(\"tareaId\", b.id);\r",
+              "    pm.environment.set(\"tareaId\", b.id);\r",
               "});\r",
               "pm.test(\"Tiempo de respuesta menor a 500ms\", () => {\r",
               "    pm.expect(pm.response.responseTime).to.be.below(500);\r",
