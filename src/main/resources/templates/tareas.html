@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Tareas</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .tarea-item { padding: 8px; margin: 4px 0; background: #f0f0f0; border-radius: 4px; }
+        #btn-nueva { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Lista de Tareas</h1>
+    <button id="btn-nueva">Nueva Tarea</button>
+    <ul id="lista-tareas"></ul>
+
+    <script>
+        fetch('/api/tareas')
+            .then(r => r.json())
+            .then(tareas => {
+                const lista = document.getElementById('lista-tareas');
+                tareas.forEach(t => {
+                    const li = document.createElement('li');
+                    li.className = 'tarea-item';
+                    li.textContent = t.titulo;
+                    lista.appendChild(li);
+                });
+            })
+            .catch(() => {});
+    </script>
+</body>
+</html>

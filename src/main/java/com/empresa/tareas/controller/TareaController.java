@@ -6,10 +6,12 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
-@RestController
-@RequestMapping("/api/tareas")
+@Controller
+@RequestMapping
 public class TareaController {
 
     private final TareaService service;
@@ -18,12 +20,25 @@ public class TareaController {
         this.service = service;
     }
 
-    @PostMapping
+    @GetMapping("/tareas")
+    public String paginaTareas() {
+        return "tareas";
+    }
+
+    @PostMapping("/api/tareas")
+    @ResponseBody
     public ResponseEntity<Tarea> crear(@Valid @RequestBody Tarea tarea) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.crear(tarea));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/api/tareas")
+    @ResponseBody
+    public ResponseEntity<List<Tarea>> listar() {
+        return ResponseEntity.ok(service.listarTodas());
+    }
+
+    @GetMapping("/api/tareas/{id}")
+    @ResponseBody
     public ResponseEntity<Tarea> buscar(@PathVariable Long id) {
         try {
             return ResponseEntity.ok(service.buscarPorId(id));
@@ -32,7 +47,8 @@ public class TareaController {
         }
     }
 
-    @PatchMapping("/{id}/completar")
+    @PatchMapping("/api/tareas/{id}/completar")
+    @ResponseBody
     public ResponseEntity<Tarea> completar(@PathVariable Long id) {
         try {
             return ResponseEntity.ok(service.completar(id));

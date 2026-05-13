@@ -4,6 +4,7 @@ import com.empresa.tareas.entity.Tarea;
 import com.empresa.tareas.exception.TareaNotFoundException;
 import com.empresa.tareas.repository.TareaRepository;
 import org.springframework.stereotype.Service;
+import java.util.List;
 
 @Service
 public class TareaService {
@@ -23,6 +24,10 @@ public class TareaService {
     public Tarea buscarPorId(Long id) {
         return repo.findById(id)
                 .orElseThrow(() -> new TareaNotFoundException(id));
+    }
+
+    public List<Tarea> listarTodas() {
+        return repo.findAll();
     }
 
     public Tarea completar(Long id) {
