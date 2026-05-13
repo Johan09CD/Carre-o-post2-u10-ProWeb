@@ -1,4 +1,4 @@
-markdown# Pruebas E2E — Post-Contenido 2, Unidad 10
+# Pruebas E2E — Post-Contenido 2, Unidad 10
 
 ## Descripción
 
@@ -49,6 +49,7 @@ El workflow se ejecuta automáticamente en cada push a `main`.
 Se puede ver el resultado en la pestaña **Actions** del repositorio.
 
 ## Estructura del repositorio
+ 
 ├── .github/
 │   └── workflows/
 │       └── api-tests.yml
