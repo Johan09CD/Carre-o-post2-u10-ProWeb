@@ -1,96 +1,124 @@
-# Suite de Pruebas — Post-Contenido 1, Unidad 10
+markdown# Pruebas E2E — Post-Contenido 2, Unidad 10
 
 ## Descripción
 
-Aplicación Spring Boot de gestión de tareas con suite de pruebas automatizadas
-implementando JUnit 5, Mockito, @WebMvcTest, @DataJpaTest y JaCoCo para
-medición de cobertura de código.
+Extensión del proyecto Post-Contenido 1. Se implementan pruebas de extremo
+a extremo con Selenium WebDriver aplicando el patrón Page Object Model,
+una colección de pruebas de API REST en Postman con test scripts, y
+automatización mediante Newman integrado en un pipeline de GitHub Actions.
 
-## Arquitectura implementada
-TareaController (@RestController)
-↑
-TareaService (@Service)
-↑
-TareaRepository (JpaRepository)
-↑
-Tarea (@Entity)
+## Arquitectura de pruebas
+Pruebas E2E (Selenium)
+↓
+TareasPage / NuevaTareaPage (Page Object Model)
+↓
+Aplicación Spring Boot (localhost:8080)
+↓
+Pruebas de API (Postman + Newman)
+↓
+Pipeline CI/CD (GitHub Actions)
+
+## Prerrequisitos
+
+- Java 21+
+- Maven 3.9.x
+- Google Chrome instalado
+- Node.js 18+ con npm
+- Postman Desktop v10+
+- Newman: `npm install -g newman`
 
 ## Cómo ejecutar
 
-1. Clonar el repositorio: https://github.com/Johan09CD/Carre-o-post1-u10-ProWeb
-2. Desde la raíz del proyecto ejecutar:
+### Pruebas Selenium
+```cmd
+mvn test -Dtest=TareasE2ETest -Dnet.bytebuddy.experimental=true
+```
 
-mvn clean test
+### Pruebas Newman localmente
+Primero inicia la aplicación:
+```cmd
+mvn spring-boot:run
+```
+Luego en otra terminal:
+```cmd
+newman run postman/ColeccionToDo.json --environment postman/env-local.json
+```
 
-3. Para generar el reporte de cobertura JaCoCo:
+### Pipeline GitHub Actions
+El workflow se ejecuta automáticamente en cada push a `main`.
+Se puede ver el resultado en la pestaña **Actions** del repositorio.
 
-mvn clean test jacoco:report
+## Estructura del repositorio
+├── .github/
+│   └── workflows/
+│       └── api-tests.yml
+├── postman/
+│   ├── ColeccionToDo.json
+│   ├── env-local.json
+│   └── env-ci.json
+├── src/
+│   ├── main/
+│   │   └── resources/
+│   │       └── templates/
+│   │           └── tareas.html
+│   └── test/
+│       └── java/com/empresa/tareas/
+│           └── e2e/
+│               ├── TareasPage.java
+│               ├── NuevaTareaPage.java
+│               └── TareasE2ETest.java
+└── pom.xml
 
-4. Abrir el reporte en el navegador:
+## Clases Page Object implementadas
 
-target/site/jacoco/index.html
+| Clase | Descripción |
+|-------|-------------|
+| TareasPage | Encapsula selectores y acciones de la página principal |
+| NuevaTareaPage | Encapsula selectores y acciones del formulario de nueva tarea |
 
-## Clases de prueba implementadas
+## Colección Postman — 5 requests
 
-| Clase | Tipo | Descripción |
-|-------|------|-------------|
-| TareaServiceTest | Unitaria (@ExtendWith) | Prueba la lógica de negocio con mocks de Mockito |
-| TareaControllerTest | Integración (@WebMvcTest) | Prueba la capa web en aislamiento con MockMvc |
-| TareaRepositoryTest | Integración (@DataJpaTest) | Prueba la capa de datos con H2 en memoria |
-
-## Tests implementados
-
-| Test | Clase | Qué verifica |
-|------|-------|-------------|
-| crear_conTituloValido_guardaYRetorna | TareaServiceTest | Guarda y retorna la tarea correctamente |
-| crear_conTituloVacio_lanzaIllegalArgumentException | TareaServiceTest | Lanza excepción si el título está vacío |
-| buscarPorId_noExiste_lanzaEntityNotFoundException | TareaServiceTest | Lanza excepción si la tarea no existe |
-| completar_tareaExistente_marcaCompletadaYGuarda | TareaServiceTest | Marca la tarea como completada |
-| get_tareaExiste_retorna200 | TareaControllerTest | Retorna 200 con la tarea encontrada |
-| get_noExiste_retorna404 | TareaControllerTest | Retorna 404 cuando la tarea no existe |
-| findByCompletada_false_retornaUnaTarea | TareaRepositoryTest | Filtra tareas por estado completada=false |
-| findByCompletada_true_retornaListaVacia | TareaRepositoryTest | Retorna lista vacía cuando no hay completadas |
-
-## Cobertura JaCoCo
-
-- Umbral mínimo configurado: 70% de líneas en el paquete service
-- Reporte generado en: target/site/jacoco/index.html
-- Clases excluidas: *Application.class y entidades
+| # | Request | Método | Qué verifica |
+|---|---------|--------|-------------|
+| 1 | POST Crear Tarea | POST | Status 201, id numérico, tiempo < 500ms |
+| 2 | GET Obtener Tarea | GET | Status 200, título correcto |
+| 3 | PATCH Completar Tarea | PATCH | Status 200, completada = true |
+| 4 | GET Verificar Completada | GET | Status 200, completada = true |
+| 5 | GET Tarea Inexistente 404 | GET | Status 404 |
 
 ## Principios aplicados
 
-- **@ExtendWith(MockitoExtension):** pruebas unitarias sin contexto Spring
-- **@Mock / @InjectMocks:** inyección de mocks en TareaService
-- **@WebMvcTest:** carga solo la capa web sin BD
-- **@MockBean:** mock del servicio dentro del contexto Spring
-- **@DataJpaTest:** carga solo JPA con H2 en memoria, rollback automático entre tests
-- **Patrón de nombres:** método_condición_resultado en todos los tests
+- **Page Object Model:** selectores encapsulados en constantes privadas
+- **Headless Chrome:** tests E2E sin interfaz gráfica
+- **WebDriverManager:** gestión automática del driver de Chrome
+- **pm.environment.set:** variables dinámicas entre requests en Newman
+- **GitHub Actions:** pipeline CI/CD automatizado en cada push
 
 ---
 
 ## Evidencias
 
-### Checkpoint 1 — Pruebas unitarias con Mockito en verde
-Verificación de que los 4 tests de `TareaServiceTest` pasan correctamente,
-incluyendo la verificación de que `repo.save()` nunca es invocado cuando
-el título está vacío.
+### Checkpoint 1 — Tests de Selenium en verde
+Verificación de que los 2 tests de Selenium pasan correctamente en modo
+headless, confirmando que la página carga con el título correcto y el
+botón de nueva tarea es visible.
 
-![Checkpoint 1 - TareaServiceTest](evidencias/Checkpoint1-ServiceTest.png)
-
----
-
-### Checkpoint 2 — Todos los tests en verde
-Verificación de que la suite completa de 9 tests pasa sin errores, incluyendo
-`TareaControllerTest` con `@WebMvcTest` y `TareaRepositoryTest` con
-`@DataJpaTest`.
-
-![Checkpoint 2 - Todos los tests](evidencias/Checkpoint2-AllTests.png)
+![Checkpoint 1 - Selenium](evidencias/Checkpoint1-Selenium.png)
 
 ---
 
-### Checkpoint 3 — Reporte de cobertura JaCoCo
-Verificación del reporte generado en `target/site/jacoco/index.html` mostrando
-cobertura >= 70% de líneas en el paquete `service`, cumpliendo el umbral
-configurado en el plugin jacoco-maven-plugin.
+### Checkpoint 2 — Postman Runner con 0 failures
+Verificación de que la colección de 5 requests ejecuta en orden sin errores,
+incluyendo la creación, consulta, completado y verificación de una tarea,
+además de la validación del status 404 para recursos inexistentes.
 
-![Checkpoint 3 - Reporte JaCoCo](evidencias/Checkpoint3-JaCoCo.png)
+![Checkpoint 2 - Postman Runner](evidencias/Checkpoint2-Postman.png)
+
+---
+
+### Checkpoint 3 — GitHub Actions con check verde
+Verificación de que el workflow `api-tests.yml` ejecuta correctamente en CI,
+compilando el JAR, iniciando la aplicación y ejecutando la colección Newman
+con todos los tests en verde.
+
+![Checkpoint 3 - GitHub Actions](evidencias/Checkpoint3-Actions.png)
