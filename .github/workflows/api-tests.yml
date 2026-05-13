@@ -22,19 +22,13 @@ jobs:
 
       - name: Esperar que la aplicacion responda
         run: |
-          for i in {1..15}; do
+          for i in {1..30}; do
             curl -sf http://localhost:8080/api/tareas && break
             sleep 2
           done
 
       - name: Instalar Newman
         run: npm install -g newman
-
-      - name: Crear tarea inicial para CI
-        run: |
-          curl -s -X POST http://localhost:8080/api/tareas \
-            -H "Content-Type: application/json" \
-            -d '{"titulo":"Tarea de prueba Newman","descripcion":"Creada por colección Postman"}'
 
       - name: Ejecutar coleccion con Newman
         run: newman run postman/ColeccionToDo.json --environment postman/env-ci.json

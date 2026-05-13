@@ -10,7 +10,7 @@
         },
         {
             "key": "tareaId",
-            "value": "1",
+            "value": "",
             "type": "default",
             "enabled": true
         }
